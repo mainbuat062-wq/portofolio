@@ -1,7 +1,7 @@
 'use client'; 
 
 import React from 'react';
-import Dock, { DockItemData } from './dock_temp'; 
+import Dock, { DockItemData } from './Dock'; 
 // Saya sesuaikan ikon agar cocok dengan menu portofolio Anda (Home, About, Skills, Portfolio, Contact)
 import { Home as HomeIcon, User, Code, Image as ImageIcon, Mail } from 'lucide-react';
 
