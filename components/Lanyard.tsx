@@ -103,6 +103,18 @@ function Band({ maxSpeed = 50, minSpeed = 0 }: BandProps) {
     }
   }, [texture])
 
+  // --- LOCK / UNLOCK MOBILE SCROLL ---
+const lockScroll = () => {
+  document.body.style.overflow = "hidden";
+  document.documentElement.style.overflow = "hidden";
+};
+
+const unlockScroll = () => {
+  document.body.style.overflow = "";
+  document.documentElement.style.overflow = "";
+};
+
+
 useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 0.80])
 useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 0.80])
 useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 0.60])
@@ -179,14 +191,26 @@ useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 0.60])
             position={[0, -1.2, -0.05]}
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}
-            onPointerUp={(e) => {
-              (e.target as Element).releasePointerCapture(e.pointerId)
-              drag(false)
-            }}
-            onPointerDown={(e) => {
-              (e.target as Element).setPointerCapture(e.pointerId)
-              drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())))
-            }}
+           onPointerDown={(e) => {
+  lockScroll()
+  hover(true)
+  ;(e.target as Element).setPointerCapture(e.pointerId)
+  drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())))
+}}
+
+onPointerUp={(e) => {
+  unlockScroll()
+  hover(false)
+  ;(e.target as Element).releasePointerCapture(e.pointerId)
+  drag(false)
+}}
+
+onPointerCancel={() => {
+  unlockScroll()
+  hover(false)
+  drag(false)
+}}
+
           >
             <mesh geometry={nodes.card.geometry}>
               <meshPhysicalMaterial
