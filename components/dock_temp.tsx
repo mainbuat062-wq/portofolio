@@ -12,6 +12,12 @@ import {
 import React, { Children, cloneElement, useEffect, useMemo, useRef, useState } from 'react';
 
 /* ---------------------- Dock Item ---------------------- */
+export type DockItemData = {
+  icon: React.ReactNode;
+  label: string;
+  onClick?: () => void;
+  className?: string;
+};
 
 type DockItemProps = {
   className?: string;
