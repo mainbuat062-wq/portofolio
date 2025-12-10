@@ -105,14 +105,18 @@ function Band({ maxSpeed = 50, minSpeed = 0 }: BandProps) {
 
   // --- LOCK / UNLOCK MOBILE SCROLL ---
 const lockScroll = () => {
-  document.body.style.overflow = "hidden";
-  document.documentElement.style.overflow = "hidden";
-};
+  const scrollbarWidth =
+    window.innerWidth - document.documentElement.clientWidth
+
+  document.body.style.overflow = "hidden"
+  document.body.style.paddingRight = `${scrollbarWidth}px`
+}
 
 const unlockScroll = () => {
-  document.body.style.overflow = "";
-  document.documentElement.style.overflow = "";
-};
+  document.body.style.overflow = ""
+  document.body.style.paddingRight = ""
+}
+
 
 
 useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 0.80])
