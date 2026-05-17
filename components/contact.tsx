@@ -14,7 +14,7 @@ const Contact: React.FC = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'success' | 'failed'>('idle');
+  const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'unchecked'>('idle');
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -24,8 +24,9 @@ const Contact: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // ✅ PERBAIKAN: Jika tidak ceklist, set status dan jangan lanjut
     if (!acceptTerms) {
-      setStatus('failed'); // popup merah
+      setStatus('unchecked');
       return;
     }
 
@@ -39,22 +40,33 @@ const Contact: React.FC = () => {
         process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
       );
 
-      setStatus('success'); // popup hijau
+      setStatus('success');
       setFormData({ from_name: "", from_email: "", subject: "", message: "" });
+      setAcceptTerms(false); // Reset checkbox setelah sukses
     } catch (err) {
       console.error("EmailJS Error:", err);
-      setStatus('failed'); // popup merah
+      setStatus('error');
     }
 
     setIsSubmitting(false);
   };
 
+  // ✅ PERBAIKAN: Auto-hide popup setelah 3 detik
   useEffect(() => {
     if (status !== 'idle') {
       const timer = setTimeout(() => setStatus('idle'), 3000);
       return () => clearTimeout(timer);
     }
   }, [status]);
+
+  // ✅ PERBAIKAN: Clear error jika user ceklist checkbox
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAcceptTerms(e.target.checked);
+    // Jika user ceklist, hilangkan error message
+    if (e.target.checked && status === 'unchecked') {
+      setStatus('idle');
+    }
+  };
 
   const SOCIAL_ICONS = [
     {
@@ -89,9 +101,8 @@ const Contact: React.FC = () => {
       href: "https://id.linkedin.com/in/zidni-ruf-3715aa376",
       svg: (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M4.98 3.5C4.98 4.88 3.88 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM0 8h5v16H0V8zm7 0h5v2.5h.08c.69-1.25 2.37-2.57 4.87-2.57 5.21 0 6.05 3.43 6.05 7.87V24h-5v-7.5c0-1.79-.03-4.09-2.5-4.09-2.5 0-2.88 1.95-2.88 3.97V24H7V8z"/>
-</svg>
-
+          <path d="M4.98 3.5C4.98 4.88 3.88 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM0 8h5v16H0V8zm7 0h5v2.5h.08c.69-1.25 2.37-2.57 4.87-2.57 5.21 0 6.05 3.43 6.05 7.87V24h-5v-7.5c0-1.79-.03-4.09-2.5-4.09-2.5 0-2.88 1.95-2.88 3.97V24H7V8z"/>
+        </svg>
       )
     }
   ];
@@ -104,7 +115,11 @@ const Contact: React.FC = () => {
         <div className={`fixed top-5 left-1/2 -translate-x-1/2 px-5 py-2 rounded-lg shadow-lg z-[9999] animate-fadeIn text-sm sm:text-base
           ${status === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}
         `}>
-          {status === 'success' ? 'Message sent successfully!' : 'You must accept the terms & conditions.'}
+          {status === 'success' 
+            ? '✓ Message sent successfully!' 
+            : status === 'unchecked'
+            ? '⚠️ Please accept the terms & conditions'
+            : '❌ Failed to send message. Try again!'}
         </div>
       )}
 
@@ -148,7 +163,7 @@ const Contact: React.FC = () => {
                 name="from_name"
                 value={formData.from_name}
                 onChange={handleChange}
-                className="w-full p-3 rounded-xl bg-black/20 border border-gray-500 focus:border-teal-300"
+                className="w-full p-3 rounded-xl bg-black/20 border border-gray-500 focus:border-teal-300 focus:outline-none"
                 required
               />
             </div>
@@ -159,7 +174,7 @@ const Contact: React.FC = () => {
                 name="from_email"
                 value={formData.from_email}
                 onChange={handleChange}
-                className="w-full p-3 rounded-xl bg-black/20 border border-gray-500 focus:border-teal-300"
+                className="w-full p-3 rounded-xl bg-black/20 border border-gray-500 focus:border-teal-300 focus:outline-none"
                 required
               />
             </div>
@@ -172,7 +187,7 @@ const Contact: React.FC = () => {
               name="subject"
               value={formData.subject}
               onChange={handleChange}
-              className="w-full p-3 rounded-xl bg-black/20 border border-gray-500 focus:border-teal-300"
+              className="w-full p-3 rounded-xl bg-black/20 border border-gray-500 focus:border-teal-300 focus:outline-none"
             />
           </div>
 
@@ -183,7 +198,7 @@ const Contact: React.FC = () => {
               rows={5}
               value={formData.message}
               onChange={handleChange}
-              className="w-full p-3 rounded-xl bg-black/20 border border-gray-500 resize-none focus:border-teal-300"
+              className="w-full p-3 rounded-xl bg-black/20 border border-gray-500 resize-none focus:border-teal-300 focus:outline-none"
               required
             />
           </div>
@@ -193,17 +208,17 @@ const Contact: React.FC = () => {
               <input
                 type="checkbox"
                 checked={acceptTerms}
-                onChange={(e) => setAcceptTerms(e.target.checked)}
-                className="h-4 w-4"
+                onChange={handleCheckboxChange}
+                className="h-4 w-4 cursor-pointer"
               />
               <span className="text-sm text-gray-200">
-                I accept the <a className="text-indigo-400 underline" href="#">terms & conditions</a>.
+                I accept the <a className="text-indigo-400 underline hover:text-indigo-300" href="#">terms & conditions</a>.
               </span>
             </label>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-7 py-3 bg-teal-500 hover:bg-teal-400 rounded-xl font-semibold disabled:opacity-50"
+              className="px-7 py-3 bg-teal-500 hover:bg-teal-400 rounded-xl font-semibold disabled:opacity-50 transition"
             >
               {isSubmitting ? 'Sending...' : 'Send Message'}
             </button>

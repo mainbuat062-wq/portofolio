@@ -53,8 +53,6 @@ export default function Home() {
           <Skills />
         </Container>
 
-        
-        <Gallery /> {/* Menggunakan komponen Gallery yang sudah dimodifikasi */}
 
         <Container>
           <Contact />
@@ -73,4 +71,6 @@ export default function Home() {
 
     </div>
   );
+
+  
 }
